@@ -13,8 +13,20 @@ class RoleMiddleware
      *
      * @param  Closure(Request): (Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string $roles): Response
     {
+        $user =  $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $user->loadmissing('role');
+
+        if (!$user->role ||
+    !in_array($user->role->name, explode('|', $roles), true)) {
+    return response()->json(['message' => 'Forbidden'], 403);
+}
+    
         return $next($request);
     }
 }
