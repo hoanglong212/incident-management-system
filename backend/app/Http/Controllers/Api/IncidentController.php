@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Http\Resources\IncidentResource;
 
+
 class IncidentController extends Controller
 {
     public function store(StoreIncidentRequest $request)
@@ -51,14 +52,25 @@ class IncidentController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $querry = Incident::query()->latest();
+        $query = Incident::query()->latest();
         if($user->role->name === 'USER'){
-            $querry->where('reporter_id', $user->id);
+            $query->where('reporter_id', $user->id);
         }
         if($user->role->name === 'TECHNICIAN') {
-            $querry->where('assigned_to', $user->id);
+            $query->where('assigned_to', $user->id);
         }
-        $incidents = $querry->paginate(10);
+        if($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+        if($request->filled('priority')) {
+            $query->where('priority', $request->input('priority'));
+        }
+        if($request->filled('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
+        $perPage = min((int) $request->input('per_page', 10), 50);
+
+        $incidents = $query->paginate($perPage);
         return response()->json([
         'message' => 'Incidents retrieved successfully',
         'incidents' => IncidentResource::collection($incidents),
