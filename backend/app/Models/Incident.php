@@ -28,6 +28,7 @@ class Incident extends Model
         'assigned_at',
         'resolved_at',
         'closed_at',
+        'location',
     ];
 
     protected $casts = [
@@ -35,6 +36,7 @@ class Incident extends Model
         'assigned_at' => 'datetime',
         'resolved_at' => 'datetime',
         'closed_at' => 'datetime',
+        
     ];
 
     public function category()
